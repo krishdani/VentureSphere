@@ -4,24 +4,43 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "prisma generate && next build --turbopack",
+    "vercel-build": "prisma migrate deploy && npm run build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "db:local": "node scripts/db-local.mjs",
+    "db:setup": "prisma migrate deploy && npm run db:seed",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force --skip-seed && npm run db:seed",
+    "user:password": "tsx scripts/set-password.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "6.19.3",
+    "@vercel/blob": "2.8.2",
+    "bcryptjs": "3.0.2",
+    "jose": "6.2.13",
+    "lucide-react": "1.61.0",
+    "next": "15.5.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.28"
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
+    "@eslint/eslintrc": "3.3.5",
+    "@tailwindcss/postcss": "4.3.0",
+    "@types/node": "20.19.41",
+    "@types/react": "19.2.16",
+    "@types/react-dom": "19.2.3",
+    "embedded-postgres": "17.10.0-beta.17",
+    "eslint": "9.39.4",
     "eslint-config-next": "15.5.28",
-    "@eslint/eslintrc": "^3"
+    "prisma": "6.19.3",
+    "tailwindcss": "4.3.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
   }
 }
