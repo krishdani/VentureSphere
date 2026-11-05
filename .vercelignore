@@ -1,0 +1,9 @@
+/.env
+/.env.*
+!/.env.example
+/.pgdata
+/uploads
+/.next
+/node_modules
+/coverage
+*.tsbuildinfo
