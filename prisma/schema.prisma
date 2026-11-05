@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// role: "STARTUP" | "VC" (validated in lib/constants.ts)
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  role          String
+  createdAt     DateTime       @default(now())
+  startup       Startup?
+  vcProfile     VcProfile?
+  notifications Notification[]
+}
+
+// stage: "IDEA" | "PRE_SEED" | "SEED" | "SERIES_A_PLUS"
+model Startup {
+  id              String   @id @default(cuid())
+  ownerId         String   @unique
+  owner           User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name            String
+  oneLiner        String
+  sector          String
+  stage           String
+  location        String
+  website         String?
+  teamSize        Int
+  raisingAmount   Int // USD
+  traction        String
+  pitchText       String   @default("")
+  deckFile        String?  @unique // storage key: "<hex>.pdf" on local disk or "blob:<pathname>" in Vercel Blob
+  deckOriginal    String? // original upload name
+  videoUrl        String?
+  featured        Boolean  @default(false) // shown on the landing page
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deals           Deal[]
+}
+
+model VcProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firmName   String
+  thesis     String
+  chequeMin  Int // USD
+  chequeMax  Int // USD
+  sectors    String // comma-separated
+  stages     String // comma-separated
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deals      Deal[]
+}
+
+// status: "SHORTLISTED" | "SELECTED" | "FUNDED" | "PASSED"
+model Deal {
+  id            String    @id @default(cuid())
+  vcId          String
+  vc            VcProfile @relation(fields: [vcId], references: [id], onDelete: Cascade)
+  startupId     String
+  startup       Startup   @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  status        String
+  offeredAmount Int? // USD
+  note          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([vcId, startupId])
+  @@index([startupId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
